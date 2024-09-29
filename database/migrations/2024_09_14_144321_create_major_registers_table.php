@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('major_registers', function (Blueprint $table) {
             $table->id();
             $table->foreignId('team_id');
+            $table->string('current_attendance_year')->nullable();
             $table->foreignId('student_id');
             $table->string('aprove_no')->nullable();
             $table->string('ar_wa_tha_no')->nullable();

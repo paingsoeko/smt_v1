@@ -14,6 +14,7 @@ return new class extends Migration
         Schema::create('universities', function (Blueprint $table) {
             $table->id();
             $table->foreignId('team_id');
+            $table->string('current_attendance_year')->nullable();
             $table->foreignId('student_id');
             $table->string('type');
             $table->string('major');
@@ -28,6 +29,7 @@ return new class extends Migration
             $table->string('custom_column_2')->nullable();
             $table->string('custom_column_3')->nullable();
             $table->string('custom_column_4')->nullable();
+            $table->boolean('is_win')->nullable();
             $table->unsignedInteger('created_by');
             $table->unsignedInteger('updated_by')->nullable();
             $table->unsignedInteger('deleted_by')->nullable();

@@ -43,7 +43,7 @@ class AdminPanelProvider extends PanelProvider
 
              ])
             ->colors([
-                'primary' => Color::Purple,
+                'primary' => Color::Indigo,
             ])
             ->navigationItems([
         NavigationItem::make('Messenger')
@@ -76,7 +76,7 @@ class AdminPanelProvider extends PanelProvider
                 Authenticate::class,
             ])
             ->spa()
-      
+
             ->databaseTransactions()
             ->tenant(Team::class, slugAttribute: 'slug', ownershipRelationship: 'team')
             ->tenantRegistration(RegisterTeam::class)

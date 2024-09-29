@@ -14,6 +14,7 @@ class MajorRegister extends Model
 
     protected $fillable = [
         'team_id',
+        'current_attendance_year',
         'student_id',
         'aprove_no',
         'ar_wa_tha_no',
@@ -33,7 +34,10 @@ class MajorRegister extends Model
 
         // Automatically set created_by when creating a new record
         static::creating(function ($model) {
-            $model->created_by = auth()->id(); // Set the currently authenticated user's ID
+            $currentYear = AppSettings::where('team_id', Filament::getTenant()->id)->first()->year_of_attendance_major;
+
+            $model->current_attendance_year = $currentYear;
+            $model->created_by = auth()->id();
                $model->team_id = Filament::getTenant()->id;
         });
 

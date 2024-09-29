@@ -2,31 +2,62 @@
 
 namespace App\Filament\Resources;
 
+use AlperenErsoy\FilamentExport\Actions\FilamentExportBulkAction;
 use App\Filament\Resources\MajorRegisterResource\Pages;
 use App\Filament\Resources\MajorRegisterResource\RelationManagers;
 use App\MajorType;
+use App\Models\AppSettings;
 use App\Models\MajorRegister;
 use App\Models\Student;
 use App\UniversityType;
 use Filament\Facades\Filament;
 use Filament\Forms;
+use Filament\Forms\Components\Select;
 use Filament\Forms\Components\Textarea;
 use Filament\Forms\Components\TextInput;
 use Filament\Forms\Form;
 use Filament\Resources\Resource;
 use Filament\Tables;
+use Filament\Tables\Columns\TextColumn;
 use Filament\Tables\Table;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Support\Str;
-
-
+use Filament\Support\View\Components\Modal;
 
 class MajorRegisterResource extends Resource
 {
     protected static ?string $model = MajorRegister::class;
 
-    protected static ?string $navigationIcon = 'heroicon-o-rectangle-stack';
+    protected static ?string $navigationIcon = 'heroicon-o-document-text';
+
+    public static function getNavigationLabel(): string
+    {
+        $currentYear = AppSettings::where('team_id', Filament::getTenant()->id)->first()->year_of_attendance_major ?? '';
+        if ($currentYear) {
+            return 'မေဂျာတင်' . '(' . $currentYear . ')';
+        }else{
+            return 'မေဂျာတင်';
+        }
+
+    }
+    protected static ?int $navigationSort = 1;
+    public static function getNavigationBadge(): ?string
+    {
+        // Retrieve the current year of attendance major based on the team ID
+        $appSetting = AppSettings::where('team_id', Filament::getTenant()->id)->first();
+
+        // Check if the AppSettings entry exists and has the year_of_attendance_major
+        if ($appSetting && $appSetting->year_of_attendance_major) {
+            // Count the models that match the current year of attendance
+            $count = static::getModel()::where('current_attendance_year', $appSetting->year_of_attendance_major)->count(); // Adjust 'attendance_year' based on your actual column name
+
+            return (string) $count; // Convert the count to string
+        }
+
+        return 0; // Return null if no settings found or year is not set
+    }
+
 
     public static function form(Form $form): Form
     {
@@ -106,25 +137,43 @@ class MajorRegisterResource extends Resource
 
     public static function table(Table $table): Table
     {
+        $currentYear = AppSettings::where('team_id', Filament::getTenant()->id)->first()->year_of_attendance_major;
+//        dd($currentYear);
         return $table
+            ->query(\App\Models\MajorRegister::where('team_id', Filament::getTenant()->id)->where('current_attendance_year', $currentYear))
             ->columns([
                 Tables\Columns\TextColumn::make('student.name')
                 ->label('အမည်'),
+                TextColumn::make('student.student_code')
+                    ->label('Student ID')
+                    ->sortable()
+                    ->toggleable(isToggledHiddenByDefault: true),
                 Tables\Columns\TextColumn::make('ar_wa_tha_no')
                 ->label('အဝသ'),
                 Tables\Columns\TextColumn::make('major')
                 ->label('မေဂျာ'),
                 Tables\Columns\TextColumn::make('get_university')
                 ->label('တက္ကသိုလ်'),
+
             ])
             ->filters([
                 Tables\Filters\TrashedFilter::make(),
             ])
             ->actions([
                 Tables\Actions\ViewAction::make(),
-                Tables\Actions\EditAction::make(),
+                Tables\Actions\EditAction::make()
+                 ->icon('heroicon-m-pencil-square')
+    ->button()
+    ->labeledFrom('md'),
+
+
             ])
             ->bulkActions([
+                FilamentExportBulkAction::make('export')
+                    ->extraViewData([
+                        'myVariable' => 'မေဂျာတင် အချက်လက်',
+
+                    ]),
                 Tables\Actions\BulkActionGroup::make([
                     Tables\Actions\DeleteBulkAction::make(),
                     Tables\Actions\ForceDeleteBulkAction::make(),

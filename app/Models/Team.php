@@ -37,4 +37,9 @@ class Team extends Model
     {
         return $this->hasMany(MajorRegister::class);
     }
+
+    public function appSettings(): HasMany
+    {
+        return $this->hasMany(AppSettings::class);
+    }
 }

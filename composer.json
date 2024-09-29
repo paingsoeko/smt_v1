@@ -6,9 +6,11 @@
     "license": "MIT",
     "require": {
         "php": "^8.2",
+        "alperenersoy/filament-export": "^3.0",
+        "barryvdh/laravel-snappy": "^1.0",
         "filament/filament": "^3.2",
-        "filament/spatie-laravel-settings-plugin": "^3.2",
         "laravel/framework": "^11.9",
+        "laravel/sanctum": "^4.0",
         "laravel/tinker": "^2.9"
     },
     "require-dev": {

@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
-
+use Illuminate\Support\Str;
 class Student extends Model
 {
     use HasFactory, SoftDeletes;
@@ -50,11 +50,17 @@ class Student extends Model
     {
         parent::boot();
 
-        // Automatically set created_by when creating a new record
         static::creating(function ($model) {
-            $model->created_by = auth()->id(); // Set the currently authenticated user's ID
-            $model->team_id = Filament::getTenant()->id;
+            $model->created_by = $model->created_by ?? auth()->id(); // Set the currently authenticated user's ID
+            $model->team_id = $model->team_id ?? Filament::getTenant()->id;
         });
+
+
+        static::created(function ($model) {
+            $model->student_code = strtoupper('MKT' . str_pad($model->id, 6, '0', STR_PAD_LEFT));
+            $model->save();
+        });
+
 
         // Automatically set updated_by when updating an existing record
         static::updating(function ($model) {
@@ -62,7 +68,10 @@ class Student extends Model
         });
 
     }
-
+    public function getFullNameAttribute()
+    {
+        return "{$this->name} ({$this->father_name})"; // Concatenate the names
+    }
     public function team(): BelongsTo
     {
         return $this->belongsTo(Team::class);
@@ -77,4 +86,30 @@ class Student extends Model
     {
         return $this->hasOne(MajorRegister::class);
     }
+
+    public function creator()
+    {
+        return $this->belongsTo(User::class, 'created_by');
+    }
+
+
+    public function updater()
+    {
+        return $this->belongsTo(User::class, 'updated_by');
+    }
+
+    public function level()
+    {
+        // Get the latest university record for this student
+        $university = University::where('student_id', $this->id)->latest()->first();
+
+        // Return the year_of_attendance if the university record exists
+        return $university ? $university->year_of_attendance : 'r';
+    }
+
+    public function university()
+    {
+        return $this->hasOne(University::class, 'student_id');
+    }
+
 }

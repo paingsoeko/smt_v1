@@ -13,8 +13,11 @@ return new class extends Migration
     {
         Schema::create('app_settings', function (Blueprint $table) {
             $table->id();
+            $table->foreignId('team_id');
             $table->string('year_of_attendance_major');
             $table->string('year_of_attendance_university');
+            $table->unsignedInteger('created_by')->nullable();
+            $table->unsignedInteger('updated_by')->nullable();
             $table->timestamps();
         });
     }

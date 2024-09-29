@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Filament\Facades\Filament;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -13,6 +14,7 @@ class University extends Model
 
     protected $fillable = [
         'team_id',
+        'current_attendance_year',
         'student_id',
         'type',
         'major',
@@ -27,6 +29,7 @@ class University extends Model
         'custom_column_2',
         'custom_column_3',
         'custom_column_4',
+        'is_win',
         'created_by',
         'updated_by',
         'deleted_by',
@@ -35,20 +38,34 @@ class University extends Model
 
     protected $casts = [
         'desk_id_history' => 'array',  // This will automatically convert to/from JSON when saved or retrieved
+        'is_win' => 'boolean',
     ];
 
-protected static function boot()
+    protected static function boot()
     {
         parent::boot();
 
-        // Automatically set created_by when creating a new record
         static::creating(function ($model) {
-            $model->created_by = auth()->id(); // Set the currently authenticated user's ID
+            $currentYear = AppSettings::where('team_id', Filament::getTenant()->id)->first()->year_of_attendance_university;
+            $model->current_attendance_year = $currentYear;
+            $model->created_by = auth()->id();
+
+            // Fetch the last related record based on a relationship (for example: universities)
+            $lastRecord = $model->latest()->first(); // Replace `universities` with the correct relationship
+
+            if ($lastRecord && $model->year_of_attendance == $lastRecord->year_of_attendance) {
+                // If the year_of_attendance matches, mark the last record as not winning
+                $lastRecord->is_win = false;
+                $lastRecord->save(); // Save the updated `is_win` status
+            }else if ($lastRecord && $model->year_of_attendance != $currentYear) {
+                $lastRecord->is_win = true;
+                $lastRecord->save(); // Save the updated `is_win` status
+            }
         });
 
-        // Automatically set updated_by when updating an existing record
+
         static::updating(function ($model) {
-            $model->updated_by = auth()->id(); // Set the currently authenticated user's ID
+            $model->updated_by = auth()->id();
         });
 
     }

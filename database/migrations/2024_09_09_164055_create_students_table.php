@@ -14,20 +14,20 @@ return new class extends Migration
         Schema::create('students', function (Blueprint $table) {
             $table->id();
             $table->foreignId('team_id');
-            $table->string('student_code')->unique();
+            $table->string('student_code')->unique()->nullable();
             $table->string('name');
             $table->string('student_nrc_code')->nullable();
-            $table->integer('student_nrc_no')->nullable();
+            $table->string('student_nrc_no')->nullable();
             $table->date('date_of_birth')->nullable();
             $table->string('grade_10_desk_id')->nullable();
             $table->integer('grade_10_total_mark')->nullable();
             $table->string('grade_10_passed_year')->nullable();
             $table->string('father_name')->nullable();
             $table->string('father_nrc_code')->nullable();
-            $table->integer('father_nrc_no')->nullable();
+            $table->string('father_nrc_no')->nullable();
             $table->string('mother_name')->nullable();
             $table->string('mother_nrc_code')->nullable();
-            $table->integer('mother_nrc_no')->nullable();
+            $table->string('mother_nrc_no')->nullable();
             $table->string('student_phone')->nullable();
             $table->string('parent_phone')->nullable();
             $table->string('address')->nullable();
